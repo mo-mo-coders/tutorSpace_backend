@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "removeComments": true,
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "incremental": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@root/*": ["./*"],
+      "@interfaces/*": [
+        "./src/typescript/interfaces/*",
+        "./src/typescript/interfaces"
+      ],
+      "@models/*": [
+        "./src/models/*"
+      ],
+      "@middlewares/*": [
+        "./src/middlewares/*"
+      ],
+      "@controllers/*": [
+        "./src/controllers/*"
+      ],
+      "@schemas/*": [
+        "./src/schemas/*"
+      ],
+      "@routes/*": [
+        "./src/routes/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@config": [
+        "./src/config/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@logger": [
+        "./src/lib/logger.ts"
+      ]
+    }
+  },
+  "include": ["**/*.ts"]
+}
