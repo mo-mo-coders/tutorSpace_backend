@@ -1,37 +1,95 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 enum Role {
-  STUDENT
-  TUTOR
+    STUDENT
+    TUTOR
 }
 
 // student model
 model Student {
-  id          String   @id @default(uuid())
-  name        String
-  email       String
-  contact     String
-  password    String
-  role        Role
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt()
+    id        String   @id @default(uuid())
+    name      String
+    email     String? @unique
+    contact   String @unique
+    password  String
+    role      Role
+    studentInfo StudentInfo[] @relation("studentInfo")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
 }
 
 // tutor model
-model Tutor{
-    id          String   @id @default(uuid())
-    name        String
-    email      String
-    contact     String
-    password    String
-    role        Role
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt()
+model Tutor {
+    id        String   @id @default(uuid())
+    name      String
+    email     String @unique
+    contact   String @unique
+    password  String
+    role      Role
+    tutorInfo tutorInfo[] @relation("tutorInfo")
+    tutorCard tutorCard[] @relation("tutorCard")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+}
+
+// student info model
+model StudentInfo {
+    id        String   @id @default(uuid())
+    availableTime String
+    subjects     String[]
+    address    String
+    studentId String
+    student   Student  @relation("studentInfo", fields: [studentId], references: [id])
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+}
+
+// tutor info model
+model tutorInfo{
+    id        String   @id @default(uuid())
+    experience String
+    current_education String
+    expected_salary String
+    availableTime String
+    subjects     String[]
+    address    String
+    classesWithSubjects Json
+    tutorId String
+    tutor   Tutor  @relation("tutorInfo", fields: [tutorId], references: [id])
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+}
+
+// tutor card model
+model tutorCard{
+    id String @id @default(uuid())
+    rating Int
+    tutorDemo Video?
+    tutorId String
+    tutor Tutor @relation("tutorCard", fields: [tutorId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+}
+
+// video model
+model Video{
+    id String @id @default(uuid())
+    videoUrl String
+    thumbnailUrl String
+    tutorCardId String @unique
+    tutorCard tutorCard @relation(fields: [tutorCardId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
 }
