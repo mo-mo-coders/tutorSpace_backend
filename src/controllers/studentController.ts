@@ -4,6 +4,8 @@ import { sendResponse } from "../middlewares/sendResponse";
 import { createToken } from "../utils/tokenManger";
 import bcrypt from "bcrypt";
 
+import prismadb from "../db/prismaDb";
+
 import z from "zod";
 
 const emailSchema = z.string().email();
@@ -30,7 +32,6 @@ const emailSchema = z.string().email();
 //     message: specialCharacterErrorMessage,
 //   });
 
-import prismadb from "../db/prismaDb";
 
 
 // signup student

@@ -48,7 +48,7 @@ model StudentInfo {
     subjects     String[] //array of subjects
     address    String
     studentId String
-    student   Student  @relation("studentInfo", fields: [studentId], references: [id])
+    student   Student  @relation("studentInfo", fields: [studentId], references: [id] , onDelete: Cascade)
     
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -65,7 +65,7 @@ model tutorInfo{
     address    String
     classesWithSubjects Json
     tutorId String
-    tutor   Tutor  @relation("tutorInfo", fields: [tutorId], references: [id])
+    tutor   Tutor  @relation("tutorInfo", fields: [tutorId], references: [id] , onDelete: Cascade)
     
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -77,7 +77,7 @@ model tutorCard{
     rating Int
     tutorDemo Video?
     tutorId String
-    tutor Tutor @relation("tutorCard", fields: [tutorId], references: [id])
+    tutor Tutor @relation("tutorCard", fields: [tutorId], references: [id] , onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -89,7 +89,7 @@ model Video{
     videoUrl String
     thumbnailUrl String
     tutorCardId String @unique
-    tutorCard tutorCard @relation(fields: [tutorCardId], references: [id])
+    tutorCard tutorCard @relation(fields: [tutorCardId], references: [id] , onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
 }
