@@ -17,7 +17,8 @@ export const verifyToken = catchAsyncErrors(async (req: Request, res: Response, 
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
     const decoded = jwt.verify(token, ENV_CONFIG.JWT_SECRET as string) as DecodedToken;
-    res.locals.jwtData = decoded;
+    req.cookies.user=decoded;
+    console.log(req.cookies.user);
     
     const student = await prismadb.student.findFirst({
         where: {

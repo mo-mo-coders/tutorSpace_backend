@@ -3,10 +3,15 @@ import morgan from "morgan";
 import cors from "cors";
 import bodyParser from "body-parser";
 import ENV_CONFIG from "./config/config";
+import cookieParser from "cookie-parser";
+
+import appRouter from "./routes/index";
 
 const app = express();
 
 // middlewares
+app.use(cookieParser());
+
 app.use(
     bodyParser.urlencoded({ 
         limit: (ENV_CONFIG.MAX_REQUEST_SIZE as string | number) || '100kb', 
@@ -38,7 +43,7 @@ app.get("/", (req, res) => {
     res.send("Welcome to the client API");
   });
 
-// app.use("/api", appRouter);
+app.use("/api", appRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);

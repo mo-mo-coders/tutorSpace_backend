@@ -45,7 +45,7 @@ model Tutor {
 model StudentInfo {
     id        String   @id @default(uuid())
     availableTime String
-    subjects     String[]
+    subjects     String[] //array of subjects
     address    String
     studentId String
     student   Student  @relation("studentInfo", fields: [studentId], references: [id])
