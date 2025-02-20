@@ -86,7 +86,7 @@ export const createTutor= catchAsyncErrors(async (req: Request, res: Response, n
 });
 
 // login tutor
-const loginTutor = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+export const loginTutor = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -246,4 +246,3 @@ export const deleteTutorInfo = catchAsyncErrors(async (req: Request, res: Respon
         message: "Tutor info deleted successfully",
     });
 });
-
