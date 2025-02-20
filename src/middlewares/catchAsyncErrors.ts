@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import { AsyncHandler } from '../types/types.middleware';
 
-type AsyncHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => Promise<any>;
 
 export  default  (theFunc: AsyncHandler) => {
   return async (req: Request, res: Response, next: NextFunction) => {

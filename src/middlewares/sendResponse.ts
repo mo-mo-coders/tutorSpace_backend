@@ -1,15 +1,8 @@
 import ENV_CONFIG from "../config/config";
-import { STATUS } from "../constants/status.constants";
 import { Response } from "express";
+import { STATUS } from "../constants/status.constants";
+import { ResponseData } from "../interfaces/interface.middleware";
 
-interface ResponseData {
-    status: keyof typeof STATUS;
-    data?: [] | {};
-    message?: string;
-    error?: any;
-    forceError?: boolean;
-    [key: string]: any;
-}
 
 export const sendResponse = (res:Response, responseData:ResponseData) => {
     let error = undefined;
