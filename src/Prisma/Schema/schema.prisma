@@ -12,6 +12,19 @@ enum Role {
     TUTOR
 }
 
+enum RequestStatus {
+  PENDING
+  MATCHED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum LessonStatus {
+  PENDING
+  ONGOING
+  COMPLETED
+}
+
 // student model
 model Student {
     id        String   @id @default(uuid())
@@ -21,6 +34,8 @@ model Student {
     password  String
     role      Role
     studentInfo StudentInfo[] @relation("studentInfo")
+    tutorRequest TutorRequest[] 
+    lesson Lesson[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -36,6 +51,8 @@ model Tutor {
     role      Role
     tutorInfo tutorInfo[] @relation("tutorInfo")
     tutorCard tutorCard[] @relation("tutorCard")
+    tutorRequestMatch TutorRequestMatch[]
+    lesson Lesson[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -64,9 +81,11 @@ model tutorInfo{
     subjects     String[]
     address    String
     classesWithSubjects Json
+    asssigned Boolean @default(false)
     tutorId String
     tutor   Tutor  @relation("tutorInfo", fields: [tutorId], references: [id] , onDelete: Cascade)
-    
+    tutorCard tutorCard[] @relation("tutorInfoToTutorCard")
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
 }
@@ -78,6 +97,8 @@ model tutorCard{
     tutorDemo Video?
     tutorId String
     tutor Tutor @relation("tutorCard", fields: [tutorId], references: [id] , onDelete: Cascade)
+    tutroInfoId String
+    tutorInfo tutorInfo @relation("tutorInfoToTutorCard",fields: [tutroInfoId], references: [id] , onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -92,4 +113,35 @@ model Video{
     tutorCard tutorCard @relation(fields: [tutorCardId], references: [id] , onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
+}
+
+// tutor request table (for matching students with tutors)
+model TutorRequest {
+  id          String   @id @default(uuid())
+  studentId   String   @unique
+  student     Student  @relation(fields: [studentId], references: [id])
+  matchedTutors TutorRequestMatch[]
+  status      RequestStatus
+  createdAt   DateTime @default(now())
+}
+
+model TutorRequestMatch {
+  id          String   @id @default(uuid())
+  requestId   String
+  request     TutorRequest @relation(fields: [requestId], references: [id])
+  tutorId     String
+  tutor       Tutor @relation(fields: [tutorId], references: [id])
+  accepted    Boolean @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Lesson {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  tutorId   String
+  tutor     Tutor    @relation(fields: [tutorId], references: [id])
+  subject   String
+  status    LessonStatus @default(PENDING)
+  createdAt DateTime @default(now())
 }
