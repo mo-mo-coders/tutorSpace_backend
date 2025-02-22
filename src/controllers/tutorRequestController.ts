@@ -1,16 +1,13 @@
 import catchAsyncErrors from "../middlewares/catchAsyncErrors";
 import { Request, Response, NextFunction } from "express";
 import { sendResponse } from "../middlewares/sendResponse";
+import { getIntegerPart } from "../utils/getIntegerfromString";
 
 import prismadb from "../db/prismaDb";
 
-function getIntegerPart(str: string): number {
-  const digitsOnly = str.replace(/\D/g, ""); // Remove all non-digit characters
-  return parseInt(digitsOnly, 10) || 0; // Fallback to 0 if parsing fails
-}
 
 // get matched tutors
-const getMatchedTutors = catchAsyncErrors(
+export const getMatchedTutors = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     const { student_id } = req.params;
 
@@ -58,6 +55,54 @@ const getMatchedTutors = catchAsyncErrors(
       status: 200,
       data: topTutors,
       message: "Top 5 tutors found",
+    });
+  }
+);
+
+
+// create tutor request and match tutors to student
+export const createTutorRequest = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { student_id } = req.params;
+
+    const{selectedTutors , status}= req.body;
+
+    const student = await prismadb.student.findFirst({
+      where: {
+        id: student_id,
+      },
+    });
+
+    if(!student){
+      return sendResponse(res, {
+        status: 404,
+        message: " cannot make request, Student not found",
+      });
+    }
+
+    const tutorRequest= await prismadb.tutorRequest.create({
+      data:{
+        studentId: student_id,
+        selectedTutors: selectedTutors,
+        status: "PENDING"
+      }
+    });
+
+    await prismadb.tutorRequestMatch.createMany({
+      data: selectedTutors.map((tut: any)=>{
+        return{
+          requestId: tutorRequest.id,
+          tutorId: tut.id,
+          accepted: false
+        }
+      })
+    })
+
+
+    return sendResponse(res, {
+      status: 201,
+      data: tutorRequest,
+      message: "Request created",
     });
   }
 );

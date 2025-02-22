@@ -120,6 +120,7 @@ model TutorRequest {
   id          String   @id @default(uuid())
   studentId   String   @unique
   student     Student  @relation(fields: [studentId], references: [id])
+  selectedTutors Json
   matchedTutors TutorRequestMatch[]
   status      RequestStatus
   createdAt   DateTime @default(now())
