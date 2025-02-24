@@ -120,10 +120,12 @@ model TutorRequest {
   id          String   @id @default(uuid())
   studentId   String   @unique
   student     Student  @relation(fields: [studentId], references: [id])
+  subjects    String[]
   selectedTutors Json
   matchedTutors TutorRequestMatch[]
   status      RequestStatus
   createdAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 }
 
 model TutorRequestMatch {
@@ -134,6 +136,8 @@ model TutorRequestMatch {
   tutor       Tutor @relation(fields: [tutorId], references: [id])
   accepted    Boolean @default(false)
   createdAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+  notifiedAt DateTime?
 }
 
 model Lesson {
@@ -142,7 +146,8 @@ model Lesson {
   student   Student  @relation(fields: [studentId], references: [id])
   tutorId   String
   tutor     Tutor    @relation(fields: [tutorId], references: [id])
-  subject   String
+  subjects   String[]
   status    LessonStatus @default(PENDING)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
