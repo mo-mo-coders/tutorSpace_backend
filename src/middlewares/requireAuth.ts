@@ -25,8 +25,13 @@ export const verifyToken = catchAsyncErrors(async (req: Request, res: Response, 
           id: decoded.id,
         },
       });
-      console.log("admin", student);
-      if (!student) {
+
+    const tutor = await prismadb.tutor.findFirst({
+        where: {
+          id: decoded.id,
+        },
+      });
+      if (!student && !tutor) {
         return sendResponse(res, {
           status: 404,
           message: "You are not authorized to access this route",

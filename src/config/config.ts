@@ -32,6 +32,11 @@ const ENV_CONFIG = createEnv({
         value: process.env.MAX_REQUEST_SIZE || "10mb",
         required: false,
     },
+    REDIS_PASSWORD: {
+        value: process.env.redis_pw || "",
+        required: true,
+        type: "string",
+    },
 });
 
 export default ENV_CONFIG;

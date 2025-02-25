@@ -82,7 +82,7 @@ model tutorInfo{
     address    String
     classesWithSubjects Json
     asssigned Boolean @default(false)
-    tutorId String
+    tutorId String @unique
     tutor   Tutor  @relation("tutorInfo", fields: [tutorId], references: [id] , onDelete: Cascade)
     tutorCard tutorCard[] @relation("tutorInfoToTutorCard")
 
@@ -126,7 +126,7 @@ model TutorRequest {
   status      RequestStatus
   createdAt   DateTime @default(now())
   updatedAt  DateTime @updatedAt()
-}
+} 
 
 model TutorRequestMatch {
   id          String   @id @default(uuid())

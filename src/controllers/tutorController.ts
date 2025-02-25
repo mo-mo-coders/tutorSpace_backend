@@ -138,7 +138,7 @@ export const loginTutor = catchAsyncErrors(async (req: Request, res: Response, n
 export const createTutorInfo = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
     const {tutor_id}= req.params;
 
-    const { experience, current_education, expected_salary, availableTime, subjects , address , classesWithSubjects ,  } = req.body;
+    const { experience, current_education, expected_salary, availableTime, subjects , address , classesWithSubjects   } = req.body;
 
     // error handling
     if (!experience || !current_education || !expected_salary || !availableTime || !subjects || !address || !classesWithSubjects) {

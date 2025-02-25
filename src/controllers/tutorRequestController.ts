@@ -5,7 +5,7 @@ import { getIntegerPart } from "../utils/getIntegerfromString";
 
 import { scheduleTutorReassignment } from "../services/tutorRequestServices";
 
-import { Worker } from "bullmq";
+
 import prismadb from "../db/prismaDb";
 
 // get matched tutors
@@ -55,7 +55,8 @@ export const getMatchedTutors = catchAsyncErrors(
 
     return sendResponse(res, {
       status: 200,
-      data: topTutors,
+      topTutors: topTutors,
+      matchedTutorInfo: matchedTutorInfo,
       message: "Top 5 tutors found",
     });
   }
@@ -118,35 +119,7 @@ export const createTutorRequest = catchAsyncErrors(
 
     scheduleTutorReassignment(tutorRequest.id);
 
-    // Worker to process tutor reassignment
-    new Worker("tutorQueue", async (job) => {
-      const { requestId } = job.data;
-
-      // Find the current tutor who was notified but hasn't responded
-      const currentTutor = await prismadb.tutorRequestMatch.findFirst({
-        where: { requestId, accepted: false, notifiedAt: { not: null } },
-      });
-
-      if (!currentTutor) return;
-
-      // Find the next tutor
-      const nextTutor = await prismadb.tutorRequestMatch.findFirst({
-        where: { requestId, notifiedAt: null },
-        orderBy: { createdAt: "asc" },
-      });
-
-      if (nextTutor) {
-        // Notify the next tutor
-        await prismadb.tutorRequestMatch.update({
-          where: { id: nextTutor.id },
-          data: { notifiedAt: new Date() },
-        });
-
-        // Schedule another check in 3 hours
-        await scheduleTutorReassignment(requestId);
-      }
-    });
-
+   
     return sendResponse(res, {
       status: 201,
       data: tutorRequest,
@@ -158,12 +131,14 @@ export const createTutorRequest = catchAsyncErrors(
 // accept tutor request from tutor side and update in the database
 export const updateTutorRequest= catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { requestId, tutorId } = req.params;
+    const { request_id } = req.params;
+    console.log("requestId", request_id);
+    const tutor_id= req.query.tutor_id as string;
 
     const tutorRequestMatch = await prismadb.tutorRequestMatch.findFirst({
       where: {
-        requestId,
-        tutorId,
+        requestId:request_id,
+        tutorId: tutor_id,
       },
     });
 
@@ -184,13 +159,13 @@ export const updateTutorRequest= catchAsyncErrors(
     });
 
     const allAccepted = await prismadb.tutorRequestMatch.findMany({
-      where: { requestId, accepted: true },
+      where: { requestId:request_id, accepted: true },
     });
   
     if (allAccepted.length > 0) {
       // Update TutorRequest status
       const updatedTutorRequest=await prismadb.tutorRequest.update({
-        where: { id: requestId },
+        where: { id: request_id },
         data: { status: "IN_PROGRESS" },
       });
   
@@ -198,11 +173,16 @@ export const updateTutorRequest= catchAsyncErrors(
       await prismadb.lesson.create({
         data: {
           studentId: updatedTutorRequest.studentId,
-          tutorId: tutorId,
+          tutorId: tutor_id,
           subjects: updatedTutorRequest.subjects,
           status: "ONGOING",
         },
       });
+
+      await prismadb.tutorInfo.update({
+        where: { tutorId: tutor_id },
+        data: { asssigned: true },
+      })
 
     return sendResponse(res, {
       status: 200,
