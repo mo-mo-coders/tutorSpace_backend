@@ -5,11 +5,11 @@ const authorizeRole = (role) => {
     return (req, res, next) => {
         if (!req.cookies.user) {
             res.status(401).json({ error: "Unauthorized: No User Found" });
-            return;
+            return; // End the function with void
         }
         if (req.cookies.user.role !== role) {
             res.status(403).json({ error: "Forbidden: You do not have permission" });
-            return;
+            return; // End the function with void
         }
         next();
     };

@@ -17,10 +17,6 @@ const sendResponse = (res, responseData) => {
                 "The actual error has been hidden for security reasons, Please report the administrator for more information.";
         }
     }
-    return res.status(responseData.status).json({
-        ...status_constants_1.STATUS[responseData.status || 200],
-        ...responseData,
-        error,
-    });
+    return res.status(responseData.status).json(Object.assign(Object.assign(Object.assign({}, status_constants_1.STATUS[responseData.status || 200]), responseData), { error }));
 };
 exports.sendResponse = sendResponse;

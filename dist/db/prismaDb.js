@@ -7,6 +7,7 @@ try {
         prismadb = new client_1.PrismaClient();
     }
     else {
+        // Check if prisma exists on global
         if (!global.prisma) {
             global.prisma = new client_1.PrismaClient({
                 log: ['query', 'error', 'warn'],

@@ -23,6 +23,7 @@ const createEnv = (env) => {
 };
 const createSchema = (env, key) => {
     const { required = true, type = "string", isUrl = false } = env;
+    // if the value is not provided, throw an error
     const schema = zod_1.z
         .string({
         message: `${key} must be a string`,
@@ -59,6 +60,7 @@ const createSchema = (env, key) => {
     })
         .transform((val) => {
         if (isUrl) {
+            // remove trailing slash
             if (typeof val === "string") {
                 return val.replace(/\/$/, "");
             }

@@ -11,6 +11,7 @@ const config_1 = __importDefault(require("./config/config"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const index_1 = __importDefault(require("./routes/index"));
 const app = (0, express_1.default)();
+// middlewares
 app.use((0, cookie_parser_1.default)());
 app.use(body_parser_1.default.urlencoded({
     limit: config_1.default.MAX_REQUEST_SIZE || '100kb',
@@ -29,6 +30,7 @@ app.use(express_1.default.json());
 if (config_1.default.NODE_ENV === "development") {
     app.use((0, morgan_1.default)("tiny"));
 }
+// api route
 app.get("/", (req, res) => {
     res.send("Welcome to the client API");
 });

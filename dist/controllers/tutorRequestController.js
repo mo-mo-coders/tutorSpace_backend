@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,18 +18,19 @@ const sendResponse_1 = require("../middlewares/sendResponse");
 const getIntegerfromString_1 = require("../utils/getIntegerfromString");
 const tutorRequestServices_1 = require("../services/tutorRequestServices");
 const prismaDb_1 = __importDefault(require("../db/prismaDb"));
-exports.getMatchedTutors = (0, catchAsyncErrors_1.default)(async (req, res, next) => {
+// get matched tutors
+exports.getMatchedTutors = (0, catchAsyncErrors_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { student_id } = req.params;
-    const student_info = await prismaDb_1.default.studentInfo.findFirst({
+    const student_info = yield prismaDb_1.default.studentInfo.findFirst({
         where: {
             studentId: student_id,
         },
     });
-    const studentSubjects = student_info?.subjects;
-    const matchedTutorInfo = await prismaDb_1.default.tutorInfo.findMany({
+    const studentSubjects = student_info === null || student_info === void 0 ? void 0 : student_info.subjects;
+    const matchedTutorInfo = yield prismaDb_1.default.tutorInfo.findMany({
         where: {
             subjects: {
-                hasSome: studentSubjects,
+                hasSome: studentSubjects, // Matching subjects
             },
         },
         include: {
@@ -28,11 +38,13 @@ exports.getMatchedTutors = (0, catchAsyncErrors_1.default)(async (req, res, next
             tutorCard: true,
         },
     });
+    // Prepare array combining tutor and rating from the first tutorCard (if it exists)
     const tutorsWithRating = matchedTutorInfo.map((info) => {
-        const firstCard = info.tutorCard?.[0];
+        var _a;
+        const firstCard = (_a = info.tutorCard) === null || _a === void 0 ? void 0 : _a[0]; // Get the first tutorCard entry (if any)
         return {
             tutor: info.tutor,
-            rating: firstCard?.rating || 0,
+            rating: (firstCard === null || firstCard === void 0 ? void 0 : firstCard.rating) || 0,
             experience: (0, getIntegerfromString_1.getIntegerPart)(info.experience) || 0,
         };
     });
@@ -42,6 +54,7 @@ exports.getMatchedTutors = (0, catchAsyncErrors_1.default)(async (req, res, next
         }
         return b.experience - a.experience;
     });
+    // Take the top 5
     const topTutors = sortedByRating.slice(0, 5).map((item) => item.tutor);
     return (0, sendResponse_1.sendResponse)(res, {
         status: 200,
@@ -49,11 +62,12 @@ exports.getMatchedTutors = (0, catchAsyncErrors_1.default)(async (req, res, next
         matchedTutorInfo: matchedTutorInfo,
         message: "Top 5 tutors found",
     });
-});
-exports.createTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, next) => {
+}));
+// create tutor request and match tutors to student
+exports.createTutorRequest = (0, catchAsyncErrors_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { student_id } = req.params;
     const { selectedTutors, status, subjects } = req.body;
-    const student = await prismaDb_1.default.student.findFirst({
+    const student = yield prismaDb_1.default.student.findFirst({
         where: {
             id: student_id,
         },
@@ -64,7 +78,7 @@ exports.createTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             message: " cannot make request, Student not found",
         });
     }
-    const existingRequest = await prismaDb_1.default.tutorRequest.findFirst({
+    const existingRequest = yield prismaDb_1.default.tutorRequest.findFirst({
         where: {
             studentId: student_id,
             status: "IN_PROGRESS",
@@ -76,7 +90,7 @@ exports.createTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             message: "Student already has a request in progress",
         });
     }
-    const tutorRequest = await prismaDb_1.default.tutorRequest.create({
+    const tutorRequest = yield prismaDb_1.default.tutorRequest.create({
         data: {
             studentId: student_id,
             selectedTutors: selectedTutors,
@@ -84,13 +98,13 @@ exports.createTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             status: "PENDING",
         },
     });
-    await prismaDb_1.default.tutorRequestMatch.createMany({
+    yield prismaDb_1.default.tutorRequestMatch.createMany({
         data: selectedTutors.map((tut, index) => {
             return {
                 requestId: tutorRequest.id,
                 tutorId: tut.id,
                 accepted: false,
-                notifiedAt: index === 0 ? new Date() : null,
+                notifiedAt: index === 0 ? new Date() : null, // Notify the first tutor immediately
             };
         }),
     });
@@ -100,12 +114,13 @@ exports.createTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
         data: tutorRequest,
         message: "Request created",
     });
-});
-exports.updateTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, next) => {
+}));
+// accept tutor request from tutor side and update in the database
+exports.updateTutorRequest = (0, catchAsyncErrors_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { request_id } = req.params;
     console.log("requestId", request_id);
     const tutor_id = req.query.tutor_id;
-    const tutorRequestMatch = await prismaDb_1.default.tutorRequestMatch.findFirst({
+    const tutorRequestMatch = yield prismaDb_1.default.tutorRequestMatch.findFirst({
         where: {
             requestId: request_id,
             tutorId: tutor_id,
@@ -117,7 +132,7 @@ exports.updateTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             message: "Tutor request not found",
         });
     }
-    await prismaDb_1.default.tutorRequestMatch.update({
+    yield prismaDb_1.default.tutorRequestMatch.update({
         where: {
             id: tutorRequestMatch.id,
         },
@@ -125,15 +140,17 @@ exports.updateTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             accepted: true,
         },
     });
-    const allAccepted = await prismaDb_1.default.tutorRequestMatch.findMany({
+    const allAccepted = yield prismaDb_1.default.tutorRequestMatch.findMany({
         where: { requestId: request_id, accepted: true },
     });
     if (allAccepted.length > 0) {
-        const updatedTutorRequest = await prismaDb_1.default.tutorRequest.update({
+        // Update TutorRequest status
+        const updatedTutorRequest = yield prismaDb_1.default.tutorRequest.update({
             where: { id: request_id },
             data: { status: "IN_PROGRESS" },
         });
-        await prismaDb_1.default.lesson.create({
+        // Store lesson in Lessons table
+        yield prismaDb_1.default.lesson.create({
             data: {
                 studentId: updatedTutorRequest.studentId,
                 tutorId: tutor_id,
@@ -141,7 +158,7 @@ exports.updateTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
                 status: "ONGOING",
             },
         });
-        await prismaDb_1.default.tutorInfo.update({
+        yield prismaDb_1.default.tutorInfo.update({
             where: { tutorId: tutor_id },
             data: { asssigned: true },
         });
@@ -150,4 +167,4 @@ exports.updateTutorRequest = (0, catchAsyncErrors_1.default)(async (req, res, ne
             message: "Tutor request accepted",
         });
     }
-});
+}));

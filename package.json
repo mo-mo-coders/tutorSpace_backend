@@ -1,12 +1,14 @@
 {
   "name": "tutorspace_backend",
   "version": "1.0.0",
-  "main": "server.ts",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "ts-node dist/server.js",
-    "dev": "nodemon -L",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc -p .",
-    "build:dev": "tsc -p . && node dist/server.js"
+    "build:dev": "tsc -p . && node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "prisma generate --schema=./Prisma/schema.prisma && prisma migrate deploy --schema=./Prisma/schema.prisma"
   },
   "author": "",
   "license": "ISC",
