@@ -8,7 +8,7 @@
     "build": "tsc -p .",
     "build:dev": "tsc -p . && node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "prisma generate --schema=./Prisma/schema.prisma && prisma migrate deploy --schema=./Prisma/schema.prisma"
+    "postinstall": "prisma generate --schema=./Prisma/Schema/schema.prisma && prisma migrate deploy --schema=./Prisma/Schema/schema.prisma"
   },
   "author": "",
   "license": "ISC",
