@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const requireAuth_1 = require("../middlewares/requireAuth");
+const authorizeRole_1 = require("../middlewares/authorizeRole");
+const tutorRequestController_1 = require("../controllers/tutorRequestController");
+const tutorRequestRouter = (0, express_1.Router)();
+tutorRequestRouter.get("/:student_id/getmatchedtutors", requireAuth_1.verifyToken, tutorRequestController_1.getMatchedTutors);
+tutorRequestRouter.post("/:student_id/createRequest", requireAuth_1.verifyToken, tutorRequestController_1.createTutorRequest);
+tutorRequestRouter.put("/:request_id/updaterequest", requireAuth_1.verifyToken, (0, authorizeRole_1.authorizeRole)("TUTOR"), tutorRequestController_1.updateTutorRequest);
+exports.default = tutorRequestRouter;
