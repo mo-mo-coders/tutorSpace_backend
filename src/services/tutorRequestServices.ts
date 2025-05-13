@@ -3,13 +3,16 @@ import ENV_CONFIG from "../config/config";
 import { Worker } from "bullmq";
 import prismadb from "../db/prismaDb";
 
+
+const redisConnection = {
+  host: 'redis-10775.c12.us-east-1-4.ec2.redns.redis-cloud.com',
+  port: 10775,
+  username: "default",
+  password: ENV_CONFIG.REDIS_PASSWORD as string,
+};
+
 const tutorQueue = new Queue('tutorQueue', {
-  connection: {
-    host: 'redis-13058.c262.us-east-1-3.ec2.redns.redis-cloud.com',
-    port: 13058,
-    username: "default",
-    password: ENV_CONFIG.REDIS_PASSWORD as string,
-  }
+  connection: redisConnection
 });
 
 
@@ -49,11 +52,6 @@ new Worker(
     }
   },
   {
-    connection: {
-      host: 'redis-13058.c262.us-east-1-3.ec2.redns.redis-cloud.com',
-      port: 13058,
-      username: "default",
-      password: ENV_CONFIG.REDIS_PASSWORD as string,
-    }
+    connection: redisConnection
   }
 );
