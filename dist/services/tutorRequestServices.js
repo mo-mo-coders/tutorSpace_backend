@@ -17,13 +17,14 @@ const bullmq_1 = require("bullmq");
 const config_1 = __importDefault(require("../config/config"));
 const bullmq_2 = require("bullmq");
 const prismaDb_1 = __importDefault(require("../db/prismaDb"));
+const redisConnection = {
+    host: 'redis-10775.c12.us-east-1-4.ec2.redns.redis-cloud.com',
+    port: 10775,
+    username: "default",
+    password: config_1.default.REDIS_PASSWORD,
+};
 const tutorQueue = new bullmq_1.Queue('tutorQueue', {
-    connection: {
-        host: 'redis-13058.c262.us-east-1-3.ec2.redns.redis-cloud.com',
-        port: 13058,
-        username: "default",
-        password: config_1.default.REDIS_PASSWORD,
-    }
+    connection: redisConnection
 });
 // Function to add job to queue
 function scheduleTutorReassignment(requestId_1) {
@@ -55,10 +56,5 @@ new bullmq_2.Worker("tutorQueue", (job) => __awaiter(void 0, void 0, void 0, fun
         yield scheduleTutorReassignment(requestId);
     }
 }), {
-    connection: {
-        host: 'redis-13058.c262.us-east-1-3.ec2.redns.redis-cloud.com',
-        port: 13058,
-        username: "default",
-        password: config_1.default.REDIS_PASSWORD,
-    }
+    connection: redisConnection
 });

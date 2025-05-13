@@ -38,6 +38,6 @@ const ENV_CONFIG = (0, createEnv_1.default)({
         value: process.env.redis_pw || "",
         required: true,
         type: "string",
-    },
+    }
 });
 exports.default = ENV_CONFIG;
